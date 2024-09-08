@@ -41,7 +41,7 @@ const signIn = async (req, res) => {
       payload,
       process.env.SECRET,
       {
-        expiresIn: 3600000,
+        expiresIn: 300000,
       },
       (error, token) => {
         if (error) throw error;
@@ -54,4 +54,51 @@ const signIn = async (req, res) => {
   }
 };
 
-module.exports = { signUp, signIn };
+const verifyToken = async (req, res) => {
+  try {
+    const foundUser = await User.findById(req.user.id).select("-password");
+
+    return res.json({
+      msg: "User data found.",
+      data: foundUser,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      msg: "The user is not logged in.",
+    });
+  }
+};
+
+const update = async (req, res) => {
+  let newDataForOurUser = req.body;
+
+  if (newDataForOurUser.password) {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newDataForOurUser.password, salt);
+
+    newDataForOurUser.password = hashedPassword;
+  }
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      newDataForOurUser,
+      { new: true }
+    ).select("-password");
+
+    res.json({
+      msg: "User updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      msg: "There was an error updating the user.",
+    });
+  }
+};
+
+module.exports = { signUp, signIn, verifyToken, update };
