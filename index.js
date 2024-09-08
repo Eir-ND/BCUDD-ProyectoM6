@@ -12,7 +12,7 @@ const swaggerJsDoc = require("swagger-jsdoc");
 
 // Swagger: Definimos el puerto de la aplicación
 const port = process.env.PORT || 3000;
-const serverUrl = process.env.serverUrl || `http://localhost:${port}`;
+const serverUrl = process.env.SERVER_URL || `http://localhost:${port}`;
 
 const swaggerSpec = {
   definition: {
